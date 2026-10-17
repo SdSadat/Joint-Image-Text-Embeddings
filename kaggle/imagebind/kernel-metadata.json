@@ -10,7 +10,7 @@
   "dataset_sources": [
     "sadat0/jite-src",
     "shtvkumar/karpathy-splits",
-    "hsankesara/flickr-image-dataset",
+    "eeshawn/flickr30k",
     "niranjankn/esc50"
   ],
   "competition_sources": [],
