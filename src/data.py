@@ -10,8 +10,15 @@ CIFAR10_CLASSES = ["airplane", "automobile", "bird", "cat", "deer",
 
 
 def find_file(root, name):
-    """Kaggle datasets nest files differently; return the first match under root."""
-    for dirpath, _, filenames in os.walk(root):
+    """Kaggle datasets nest files differently; return the first match under root.
+    Kaggle mounts inputs through symlinks, so follow them but visit each real dir once."""
+    seen = set()
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+        real = os.path.realpath(dirpath)
+        if real in seen:
+            dirnames[:] = []
+            continue
+        seen.add(real)
         if name in filenames:
             return os.path.join(dirpath, name)
     raise FileNotFoundError(f"{name} not found under {root}")

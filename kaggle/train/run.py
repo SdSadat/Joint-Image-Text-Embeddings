@@ -1,15 +1,32 @@
 # Kaggle runs for E2-E4: train heads on the embeddings cached by jite-embed.
-import glob
 import os
 import shutil
 import subprocess
 import sys
 
 INPUT = "/kaggle/input"
+print("started", flush=True)
+
+
+def find(name):
+    # follow Kaggle's symlinked mounts, but visit each real directory once
+    seen = set()
+    for dirpath, dirnames, filenames in os.walk(INPUT, followlinks=True):
+        real = os.path.realpath(dirpath)
+        if real in seen:
+            dirnames[:] = []
+            continue
+        seen.add(real)
+        if name in filenames:
+            return os.path.join(dirpath, name)
+    raise FileNotFoundError(name)
+
+
 os.chdir("/kaggle/working")
-src_dir = os.path.dirname(glob.glob(f"{INPUT}/**/heads.py", recursive=True)[0])
+src_dir = os.path.dirname(find("heads.py"))
+print("src at", src_dir, flush=True)
 shutil.copytree(src_dir, "src", dirs_exist_ok=True)
-emb_dir = os.path.dirname(glob.glob(f"{INPUT}/**/flickr_meta.json", recursive=True)[0])
+emb_dir = os.path.dirname(find("flickr_meta.json"))
 
 SEEDS = [0, 1, 2]
 MAIN = ["--img-enc", "vit_b_16", "--txt-enc", "mpnet"]
@@ -21,10 +38,10 @@ def run(*args):
 
 
 def train(out, *flags):
-    run(sys.executable, "-m", "src.train", "--emb-dir", emb_dir, "--out", out, *flags)
+    run(sys.executable, "-u", "-m", "src.train", "--emb-dir", emb_dir, "--out", out, *flags)
 
 
-run(sys.executable, "-m", "pip", "install", "-q", "umap-learn")
+run(sys.executable, "-u", "-m", "pip", "install", "-q", "umap-learn")
 
 for seed in SEEDS:
     s = ["--seed", str(seed)]
@@ -47,5 +64,5 @@ for seed in SEEDS:
 
 train("results/e4/extra.csv", *MAIN, "--save-test-emb", "proj/learned_temp")
 train("results/e4/extra.csv", *MAIN, "--random-heads", "--save-test-emb", "proj/before_training")
-run(sys.executable, "-m", "src.plots", "--results", "results", "--proj", "proj")
+run(sys.executable, "-u", "-m", "src.plots", "--results", "results", "--proj", "proj")
 shutil.rmtree("src")

@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import time
 
 import numpy as np
 import torch
@@ -67,9 +68,13 @@ def encode_texts(name, texts, device, batch_size=256):
     return model.encode(texts, batch_size=batch_size, normalize_embeddings=False, show_progress_bar=False)
 
 
-def save(out_dir, name, array):
+def done(out_dir, name):
+    return os.path.exists(os.path.join(out_dir, name + ".npy"))
+
+
+def save(out_dir, name, array, start):
     np.save(os.path.join(out_dir, name + ".npy"), array.astype(np.float16))
-    print("saved", name, array.shape, flush=True)
+    print(f"saved {name} {array.shape} in {time.time() - start:.0f}s", flush=True)
 
 
 def main():
@@ -96,19 +101,24 @@ def main():
 
     for name in IMAGE_ENCODERS:
         encoder, preprocess = load_image_encoder(name, device)
-        save(args.out, f"flickr_img_{name}", encode_images(encoder, ImageFiles(image_dir, filenames, preprocess), device))
+        jobs = [(f"flickr_img_{name}", ImageFiles(image_dir, filenames, preprocess))]
         cifar_test.transform = preprocess
-        save(args.out, f"cifar_test_img_{name}", encode_images(encoder, ImagesOnly(cifar_test), device))
+        jobs.append((f"cifar_test_img_{name}", ImagesOnly(cifar_test)))
         if name != "clip":  # train set is only the k-NN bank for E1
             cifar_train.transform = preprocess
-            save(args.out, f"cifar_train_img_{name}", encode_images(encoder, ImagesOnly(cifar_train), device))
+            jobs.append((f"cifar_train_img_{name}", ImagesOnly(cifar_train)))
+        for out_name, dataset in jobs:
+            if not done(args.out, out_name):
+                start = time.time()
+                save(args.out, out_name, encode_images(encoder, dataset, device), start)
         del encoder
         torch.cuda.empty_cache()
 
     for name in list(TEXT_ENCODERS) + ["clip"]:
-        save(args.out, f"flickr_txt_{name}", encode_texts(name, captions, device))
-        save(args.out, f"cifar_prompts_txt_{name}", encode_texts(name, cifar10_prompts(), device))
-
+        for out_name, texts in [(f"flickr_txt_{name}", captions), (f"cifar_prompts_txt_{name}", cifar10_prompts())]:
+            if not done(args.out, out_name):
+                start = time.time()
+                save(args.out, out_name, encode_texts(name, texts, device), start)
 
 if __name__ == "__main__":
     main()
