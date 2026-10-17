@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+emb/
+data/
+checkpoints/
+*.npy
+*.pt
+*.pth
+kaggle.json
