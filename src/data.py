@@ -82,5 +82,8 @@ def load_esc50(root):
             paths.append(os.path.join(audio_dir, row["filename"]))
             labels.append(int(row["target"]))
             names[int(row["target"])] = row["category"]
-    class_names = [names[i].replace("_", " ") for i in range(len(names))]
+    # map targets to 0..n-1 so a subset of classes also works
+    targets = sorted(names)
+    labels = [targets.index(t) for t in labels]
+    class_names = [names[t].replace("_", " ") for t in targets]
     return paths, labels, class_names

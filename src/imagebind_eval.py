@@ -32,6 +32,13 @@ CAPTION_WORDS = {
 }
 
 
+def load_wav(path):
+    # newer torchaudio needs torchcodec + ffmpeg just to read a file; plain wavs don't
+    import soundfile
+    waveform, sample_rate = soundfile.read(path, dtype="float32", always_2d=True)
+    return torch.from_numpy(waveform.T), sample_rate
+
+
 @torch.no_grad()
 def embed(model, modality, items, load_fn, device, batch_size=32):
     out = []
@@ -46,7 +53,7 @@ def caption_words(caption):
 
 
 def save_grid(queries, top_paths, path):
-    fig, axes = plt.subplots(len(queries), 5, figsize=(10, 2 * len(queries)))
+    fig, axes = plt.subplots(len(queries), 5, figsize=(10, 2 * len(queries)), squeeze=False)
     for row, (query, paths) in enumerate(zip(queries, top_paths)):
         for col, image_path in enumerate(paths):
             ax = axes[row, col]
@@ -72,6 +79,7 @@ def main():
     from imagebind.models import imagebind_model
     from imagebind.models.imagebind_model import ModalityType
 
+    data.torchaudio.load = load_wav
     device = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(args.out_dir, exist_ok=True)
     model = imagebind_model.imagebind_huge(pretrained=True).to(device).eval()
@@ -96,7 +104,7 @@ def main():
             words_of[i] |= caption_words(caption)
     images = embed(model, ModalityType.VISION, image_paths, data.load_and_transform_vision_data, device)
 
-    top5 = (audio @ images.t()).topk(5, dim=1).indices
+    top5 = (audio @ images.t()).topk(min(5, len(images)), dim=1).indices
     labels = np.array(labels)
     grid_queries, grid_paths = [], []
     for class_name, words in CAPTION_WORDS.items():

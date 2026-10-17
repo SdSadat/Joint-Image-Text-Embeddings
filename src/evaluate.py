@@ -16,11 +16,11 @@ def recall_at_k(img, txt, caption_image, ks=(1, 5, 10)):
     max_k = max(ks)
 
     # image -> text: hit if any of the image's captions is in the top k
-    top_caps = sims.topk(max_k, dim=1).indices
+    top_caps = sims.topk(min(max_k, sims.shape[1]), dim=1).indices
     i2t_hits = caption_image[top_caps] == torch.arange(len(img), device=img.device)[:, None]
 
     # text -> image: hit if the caption's own image is in the top k
-    top_imgs = sims.t().topk(max_k, dim=1).indices
+    top_imgs = sims.t().topk(min(max_k, sims.shape[0]), dim=1).indices
     t2i_hits = top_imgs == caption_image[:, None]
 
     out = {}
