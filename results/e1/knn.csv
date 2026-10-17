@@ -1,0 +1,5 @@
+encoder,task,accuracy
+resnet50,cifar10_knn10,88.26
+vit_b_16,cifar10_knn10,93.66
+minilm,flickr_test_caption_1nn,68.68
+mpnet,flickr_test_caption_1nn,71.42

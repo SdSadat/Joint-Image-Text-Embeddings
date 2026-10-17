@@ -1,0 +1,2 @@
+model,i2t_r1,t2i_r1,i2t_r5,t2i_r5,i2t_r10,t2i_r10,modality_gap,cifar10_zero_shot
+openclip_clip,84.3,66.74,96.2,88.38,98.3,93.12,0.7039,93.67
