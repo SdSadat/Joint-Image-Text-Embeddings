@@ -45,4 +45,3 @@ karpathy = find("dataset_flickr30k.json")
 run(sys.executable, "-u", "-m", "src.imagebind_eval", "--esc50-root", INPUT, "--karpathy-json", karpathy,
     "--flickr-root", INPUT, "--out-dir", "results/e5")
 shutil.rmtree("src")
-shutil.rmtree(".checkpoints", ignore_errors=True)  # ImageBind downloads its weights here

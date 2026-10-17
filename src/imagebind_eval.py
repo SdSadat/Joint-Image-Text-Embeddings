@@ -32,6 +32,18 @@ CAPTION_WORDS = {
 }
 
 
+def load_imagebind(device):
+    # Meta's download server is very slow from Kaggle; this Hugging Face copy has
+    # exactly the same tensor names and shapes as the official checkpoint.
+    from huggingface_hub import hf_hub_download
+    from imagebind.models import imagebind_model
+    from safetensors.torch import load_file
+
+    model = imagebind_model.imagebind_huge(pretrained=False)
+    model.load_state_dict(load_file(hf_hub_download("nielsr/imagebind-huge", "model.safetensors")))
+    return model.to(device).eval()
+
+
 def load_wav(path):
     # newer torchaudio needs torchcodec + ffmpeg just to read a file; plain wavs don't
     import soundfile
@@ -76,13 +88,12 @@ def main():
     args = parser.parse_args()
 
     from imagebind import data
-    from imagebind.models import imagebind_model
     from imagebind.models.imagebind_model import ModalityType
 
     data.torchaudio.load = load_wav
     device = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(args.out_dir, exist_ok=True)
-    model = imagebind_model.imagebind_huge(pretrained=True).to(device).eval()
+    model = load_imagebind(device)
 
     # Zero-shot ESC-50 over all 2000 clips
     audio_paths, labels, class_names = load_esc50(args.esc50_root)
