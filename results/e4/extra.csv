@@ -1,0 +1,3 @@
+tag,img_enc,txt_enc,loss,batch_size,seed,temp_init,fixed_temp,temp_final,best_epoch,i2t_r1,t2i_r1,i2t_r5,t2i_r5,i2t_r10,t2i_r10,modality_gap,cifar10_zero_shot
+,resnet50,mpnet,infonce,256,0,0.07,False,0.0447,6,40.3,33.38,69.3,63.24,79.9,74.48,0.2028,53.52
+,resnet50,mpnet,random,256,0,0.07,False,0.07,0,0.1,0.12,0.1,0.46,0.3,0.86,1.0651,12.19

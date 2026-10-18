@@ -1,0 +1,10 @@
+tag,img_enc,txt_enc,loss,batch_size,seed,temp_init,fixed_temp,temp_final,best_epoch,i2t_r1,t2i_r1,i2t_r5,t2i_r5,i2t_r10,t2i_r10,modality_gap,cifar10_zero_shot
+,resnet50,mpnet,infonce,256,0,0.01,True,0.01,11,42.6,33.02,71.4,64.06,80.6,74.6,0.5838,56.95
+,resnet50,mpnet,infonce,256,0,0.07,True,0.07,7,41.0,33.42,70.0,64.22,78.7,74.64,0.1173,50.96
+,resnet50,mpnet,infonce,256,0,0.5,True,0.5,6,21.0,17.46,46.5,45.34,58.8,57.86,0.0567,47.62
+,resnet50,mpnet,infonce,256,1,0.01,True,0.01,9,42.7,33.28,70.1,63.84,79.6,75.4,0.5622,55.65
+,resnet50,mpnet,infonce,256,1,0.07,True,0.07,7,42.4,35.1,71.8,64.62,81.1,75.08,0.1426,52.98
+,resnet50,mpnet,infonce,256,1,0.5,True,0.5,9,21.5,18.76,46.4,44.68,58.4,57.24,0.0449,44.61
+,resnet50,mpnet,infonce,256,2,0.01,True,0.01,11,40.7,33.08,70.2,64.22,80.8,75.42,0.5608,57.64
+,resnet50,mpnet,infonce,256,2,0.07,True,0.07,4,42.3,33.88,71.1,64.48,80.6,75.56,0.1632,57.04
+,resnet50,mpnet,infonce,256,2,0.5,True,0.5,7,21.7,18.3,49.2,44.8,59.9,57.78,0.051,47.18
