@@ -29,7 +29,7 @@ shutil.copytree(src_dir, "src", dirs_exist_ok=True)
 emb_dir = os.path.dirname(find("flickr_meta.json"))
 
 SEEDS = [0, 1, 2]
-MAIN = ["--img-enc", "vit_b_16", "--txt-enc", "mpnet"]
+MAIN = ["--img-enc", "resnet50", "--txt-enc", "mpnet"]  # best pair in E2
 
 
 def run(*args):
