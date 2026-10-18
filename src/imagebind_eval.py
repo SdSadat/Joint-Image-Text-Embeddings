@@ -37,18 +37,11 @@ def log(message):
     print(time.strftime("%H:%M:%S"), message, flush=True)
 
 
-def load_imagebind(device):
-    # Meta's download server is very slow from Kaggle; this Hugging Face copy has
-    # exactly the same tensor names and shapes as the official checkpoint.
-    from huggingface_hub import hf_hub_download
+def load_imagebind(weights, device):
     from imagebind.models import imagebind_model
-    from safetensors.torch import load_file
 
     model = imagebind_model.imagebind_huge(pretrained=False)
-    log("downloading weights")
-    path = hf_hub_download("nielsr/imagebind-huge", "model.safetensors")
-    log("loading weights")
-    model.load_state_dict(load_file(path))
+    model.load_state_dict(torch.load(weights, map_location="cpu", weights_only=True))
     return model.to(device).eval()
 
 
@@ -92,6 +85,7 @@ def main():
     parser.add_argument("--esc50-root", required=True)
     parser.add_argument("--karpathy-json", required=True)
     parser.add_argument("--flickr-root", required=True)
+    parser.add_argument("--weights", required=True, help="imagebind_huge.pth")
     parser.add_argument("--out-dir", default="results/e5")
     args = parser.parse_args()
 
@@ -101,7 +95,8 @@ def main():
     data.torchaudio.load = load_wav
     device = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(args.out_dir, exist_ok=True)
-    model = load_imagebind(device)
+    log("loading weights")
+    model = load_imagebind(args.weights, device)
     log("model ready")
 
     # Zero-shot ESC-50 over all 2000 clips

@@ -42,6 +42,7 @@ run(sys.executable, "-u", "-m", "pip", "install", "-q", "timm", "ftfy", "regex",
 run(sys.executable, "-c", "import torch, torchvision, torchaudio; print(torch.__version__, torchvision.__version__, torchaudio.__version__)")
 
 karpathy = find("dataset_flickr30k.json")
+weights = find("imagebind_huge.pth")
 run(sys.executable, "-u", "-m", "src.imagebind_eval", "--esc50-root", INPUT, "--karpathy-json", karpathy,
-    "--flickr-root", INPUT, "--out-dir", "results/e5")
+    "--flickr-root", INPUT, "--weights", weights, "--out-dir", "results/e5")
 shutil.rmtree("src")
