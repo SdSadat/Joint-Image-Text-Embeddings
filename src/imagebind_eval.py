@@ -1,5 +1,6 @@
 import argparse
 import os
+import time
 
 import matplotlib
 matplotlib.use("Agg")
@@ -32,6 +33,10 @@ CAPTION_WORDS = {
 }
 
 
+def log(message):
+    print(time.strftime("%H:%M:%S"), message, flush=True)
+
+
 def load_imagebind(device):
     # Meta's download server is very slow from Kaggle; this Hugging Face copy has
     # exactly the same tensor names and shapes as the official checkpoint.
@@ -40,7 +45,10 @@ def load_imagebind(device):
     from safetensors.torch import load_file
 
     model = imagebind_model.imagebind_huge(pretrained=False)
-    model.load_state_dict(load_file(hf_hub_download("nielsr/imagebind-huge", "model.safetensors")))
+    log("downloading weights")
+    path = hf_hub_download("nielsr/imagebind-huge", "model.safetensors")
+    log("loading weights")
+    model.load_state_dict(load_file(path))
     return model.to(device).eval()
 
 
@@ -94,9 +102,11 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(args.out_dir, exist_ok=True)
     model = load_imagebind(device)
+    log("model ready")
 
     # Zero-shot ESC-50 over all 2000 clips
     audio_paths, labels, class_names = load_esc50(args.esc50_root)
+    log(f"embedding {len(audio_paths)} audio clips")
     audio = embed(model, ModalityType.AUDIO, audio_paths, data.load_and_transform_audio_data, device)
     prompts = [f"a sound of a {name}." for name in class_names]
     text = embed(model, ModalityType.TEXT, prompts, data.load_and_transform_text, device)
@@ -113,6 +123,7 @@ def main():
     for caption, i in zip(captions, caption_image):
         if i in words_of:
             words_of[i] |= caption_words(caption)
+    log(f"embedding {len(image_paths)} images")
     images = embed(model, ModalityType.VISION, image_paths, data.load_and_transform_vision_data, device)
 
     top5 = (audio @ images.t()).topk(min(5, len(images)), dim=1).indices
